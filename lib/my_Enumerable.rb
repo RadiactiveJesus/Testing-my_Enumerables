@@ -1,58 +1,52 @@
 module Enumerable
     def my_each
         if self.class == Array
-            for i in (1..self.length) do
+            for i  in self
                 yield(self[i])
             end 
         elsif self.class == Hash
-            for i in (1..self.length) do
+            for i in self do
                 yield(self.keys[i], self.value[i])
             end
         end 
-        return self
+        self
     end
     def my_each_with_index
         if self.class == Array
-            for i in (0..self.length-1) do
+            for i in (0...self.length) do
                 yield(self[i], i)
             end
         elsif self.class == Hash
-            for i in (0..self.keys.length-1) do
+            for i in (0...self.keys.length) do
                 yield(self.keys[i], self.values[i], i)
             end
         end
     end
     def my_select
         if self.class == Array
-            result_array = []
-            self.my_each do |value|
-                if yield(value)
-                    result_array.push(value)
-                end
+            selected = []
+            for i in self
+                selected << i if ( yield(i) == true )
             end
-            return result_array
+            selected
         elsif self.class == Hash
             result_hash = {}
             self.my_each do |key, value|
-              if yield(key, value)
-                result_hash[key] = value
-              end
+                if yield(key, value)
+                    result_hash[key] = value
+                end
             end
-            return result_hash
+            result_hash
         end 
     end
     def my_all?
         if self.class == Array
-            self.my_each do |value|
-                if !yield(value)
-                    return false
-                end
+            for i in self
+                return false if ( yield(i) == false)              
             end
         elsif self.class == Hash
-            self.my_each do |key, value|
-                if !yield(key, value)
-                    return false
-                end
+            for i, index in self
+                return false if ( yield(i, index) == false)              
             end
         end
         return true
@@ -118,17 +112,20 @@ module Enumerable
         end
         item
     end
-    def my_inject(x)
-        output = x
-        if self.class == Array
-            self.my_each do |value|
-                total = yield(total, value)
-            end
-        elsif self.class == Hash
-            self.my_each do |key, value|
-                total = yield(total, value)
+    def my_inject accumulator = nil 
+        i = 0
+        accumulator = self[i] if accumulator == nil 
+        while i < self.length 
+            if accumulator == self[0] && i == 0
+                i += 1
+                accumulator = yield(accumulator,self[i]) 
+                i += 1
+            else
+                accumulator = yield(accumulator,self[i])
+                i += 1
             end
         end
-        return total
+        accumulator 
     end
 end
+
